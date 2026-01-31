@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../providers/register_validators.dart';
+import '../providers/email_check_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -7,13 +9,50 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final userController = TextEditingController();
-  final emailController = TextEditingController();
-  final passController = TextEditingController();
-  final confirmPassController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  String role = 'Usuario';
-  String error = '';
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
+
+  String _role = 'Usuario';
+  String _emailError = '';
+  bool _checkingEmail = false;
+
+  Future<void> _checkEmail() async {
+    setState(() {
+      _checkingEmail = true;
+      _emailError = '';
+    });
+
+    bool exists = await EmailService.emailExiste(_emailCtrl.text);
+
+    setState(() {
+      _checkingEmail = false;
+      if (exists) {
+        _emailError = 'El correo ya está registrado';
+      }
+    });
+  }
+
+  void _submit() async {
+    FocusScope.of(context).unfocus();
+
+    if (!_formKey.currentState!.validate()) return;
+
+    await _checkEmail();
+    if (_emailError.isNotEmpty) return;
+
+    AuthService.register(
+      _nameCtrl.text,
+      _emailCtrl.text,
+      _passCtrl.text,
+      _role,
+    );
+
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,77 +60,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(title: const Text('Registro')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              TextField(
-                controller: userController,
-                decoration: const InputDecoration(labelText: 'Usuario'),
+              TextFormField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(labelText: 'Nombres'),
+                validator: RegisterValidators.required,
+                textInputAction: TextInputAction.next,
               ),
-              TextField(
-                controller: emailController,
+
+              TextFormField(
+                controller: _emailCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Correo electrónico',
                 ),
                 keyboardType: TextInputType.emailAddress,
+                validator: RegisterValidators.email,
+                onChanged: (_) {
+                  _emailError = '';
+                },
               ),
-              TextField(
-                controller: passController,
+
+              if (_checkingEmail)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: LinearProgressIndicator(),
+                ),
+
+              if (_emailError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.error, color: Colors.red, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        'El correo ya está registrado',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 10),
+
+              TextFormField(
+                controller: _passCtrl,
                 decoration: const InputDecoration(labelText: 'Contraseña'),
                 obscureText: true,
+                validator: RegisterValidators.password,
               ),
-              TextField(
-                controller: confirmPassController,
+
+              TextFormField(
+                controller: _confirmCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Confirmar contraseña',
                 ),
                 obscureText: true,
+                validator: (value) =>
+                    RegisterValidators.confirmPassword(value, _passCtrl.text),
               ),
+
               const SizedBox(height: 10),
-              DropdownButton<String>(
-                value: role,
+
+              DropdownButtonFormField<String>(
+                value: _role,
+                decoration: const InputDecoration(labelText: 'Rol'),
                 items: ['Usuario', 'Admin']
                     .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                     .toList(),
                 onChanged: (value) {
-                  setState(() {
-                    role = value!;
-                  });
+                  _role = value!;
                 },
               ),
-              const SizedBox(height: 10),
-              Text(error, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 10),
+
+              const SizedBox(height: 20),
+
               ElevatedButton(
-                onPressed: () {
-                  // VALIDACIONES
-                  if (userController.text.isEmpty ||
-                      emailController.text.isEmpty ||
-                      passController.text.isEmpty ||
-                      confirmPassController.text.isEmpty) {
-                    setState(() {
-                      error = 'Todos los campos son obligatorios';
-                    });
-                    return;
-                  }
-
-                  if (passController.text != confirmPassController.text) {
-                    setState(() {
-                      error = 'Las contraseñas no coinciden';
-                    });
-                    return;
-                  }
-
-                  // REGISTRO
-                  AuthService.register(
-                    userController.text,
-                    emailController.text,
-                    passController.text,
-                    role,
-                  );
-
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
+                onPressed: _submit,
                 child: const Text('Registrar'),
               ),
             ],
