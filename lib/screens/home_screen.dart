@@ -1,30 +1,48 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatelessWidget {
+  final ApiService apiService = ApiService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Bienvenido\nRol: ${AuthService.role}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                AuthService.logout();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-              child: const Text('Cerrar sesión'),
-            ),
-          ],
-        ),
+      appBar: AppBar(title: Text("Resultados API")),
+      body: FutureBuilder(
+        future: apiService.getRecursos(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            // Muestra el error técnico en pantalla para saber qué corregir
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  "Error: ${snapshot.error}",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
+
+          final items = snapshot.data as List;
+
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return Card(
+                child: ListTile(
+                  leading: Image.network(items[index]["imagen"]),
+                  title: Text(items[index]["titulo"]),
+                  subtitle: Text(items[index]["descripcion"]),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

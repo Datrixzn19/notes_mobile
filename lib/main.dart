@@ -4,6 +4,7 @@ import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding/onboarding_welcome.dart';
 import 'screens/onboarding/onboarding_features.dart';
+import 'screens/onboarding/onboarding_screens.dart';
 import 'screens/onboarding/onboarding_access.dart';
 import 'services/auth_service.dart';
 
@@ -20,13 +21,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/onboarding',
       routes: {
-        '/onboarding': (context) => const OnboardingWelcome(),
+        '/onboarding': (context) => OnboardingScreen(),
         '/onboarding-features': (context) => const OnboardingFeatures(),
         '/onboarding-access': (context) => const OnboardingAccess(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
-        '/home': (context) =>
-            AuthService.isLoggedIn ? HomeScreen() : LoginScreen(),
+        '/home': (context) => HomeScreen(),
       },
     );
   }
