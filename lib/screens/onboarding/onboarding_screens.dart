@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Pantalla de introducción (Onboarding) que guía al usuario por las funcionalidades.
 class OnboardingScreen extends StatefulWidget {
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -9,6 +10,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int pageIndex = 0;
 
+  /// Avanza a la siguiente página o navega al registro si es la última.
   void nextPage() {
     if (pageIndex < 2) {
       _controller.nextPage(
@@ -65,6 +67,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
+/// Widget reutilizable para el contenido de cada página del onboarding.
 class _OnboardingPage extends StatelessWidget {
   final String title;
   final String description;

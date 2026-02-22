@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
+/// Pantalla principal que muestra el listado de datos obtenidos de la API.
+/// Utiliza un [FutureBuilder] para manejar los estados de carga y error.
 class HomeScreen extends StatelessWidget {
   final ApiService apiService = ApiService();
 
@@ -11,10 +13,12 @@ class HomeScreen extends StatelessWidget {
       body: FutureBuilder(
         future: apiService.getRecursos(),
         builder: (context, snapshot) {
+          // Estado: Cargando
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
 
+          // Estado: Error
           if (snapshot.hasError) {
             // Muestra el error técnico en pantalla para saber qué corregir
             return Center(
@@ -28,6 +32,7 @@ class HomeScreen extends StatelessWidget {
             );
           }
 
+          // Estado: Datos cargados exitosamente
           final items = snapshot.data as List;
 
           return ListView.builder(

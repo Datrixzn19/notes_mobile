@@ -1,4 +1,5 @@
-//auth_service
+/// Servicio de autenticación simulado.
+/// Almacena las credenciales y el estado de sesión en memoria (RAM).
 class AuthService {
   static String? _user;
   static String? _email;
@@ -6,7 +7,7 @@ class AuthService {
   static String? _role;
   static bool _isLoggedIn = false;
 
-  // REGISTRO
+  /// Registra un nuevo usuario guardando sus datos en variables estáticas.
   static void register(
     String user,
     String email,
@@ -19,7 +20,7 @@ class AuthService {
     _role = role;
   }
 
-  // LOGIN
+  /// Verifica las credenciales para iniciar sesión.
   static bool login(String user, String password) {
     if (_user == user && _password == password) {
       _isLoggedIn = true;
@@ -28,7 +29,7 @@ class AuthService {
     return false;
   }
 
-  // LOGOUT
+  /// Cierra la sesión actual.
   static void logout() {
     _isLoggedIn = false;
   }

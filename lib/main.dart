@@ -8,10 +8,14 @@ import 'screens/onboarding/onboarding_screens.dart';
 import 'screens/onboarding/onboarding_access.dart';
 import 'services/auth_service.dart';
 
+/// Punto de entrada principal de la aplicación.
 void main() {
   runApp(const MyApp());
 }
 
+/// Widget raíz de la aplicación.
+///
+/// Configura las rutas de navegación y el tema global.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
